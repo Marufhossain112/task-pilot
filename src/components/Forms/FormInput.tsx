@@ -9,6 +9,7 @@ interface IInput {
   value?: string | string[] | undefined;
   placeholder?: string;
   label?: string;
+  defaultValue?: string;
 }
 
 const FormInput = ({
@@ -18,6 +19,7 @@ const FormInput = ({
   value,
   placeholder,
   label,
+  defaultValue
 }: IInput) => {
   const { control } = useFormContext();
 
@@ -43,6 +45,7 @@ const FormInput = ({
               type={type}
               size={size}
               placeholder={placeholder}
+              defaultValue={defaultValue}
               {...field}
               value={value ? value : field.value}
             />
