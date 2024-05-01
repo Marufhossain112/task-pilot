@@ -1,21 +1,43 @@
 "use client";
-import { Button, Col, Input, Row } from "antd";
+import { Button, Col, Row, message } from "antd";
 import loginImage from "@/app/assets/login-bro.png";
 import Image from "next/image";
 import Form from "@/components/Forms/Form";
 import FormInput from "@/components/Forms/FormInput";
 import { SubmitHandler } from "react-hook-form";
+import {
+  useMutation, QueryClient
+} from '@tanstack/react-query';
+import { loginFn } from "@/Utils/api";
+import { useRouter } from "next/navigation";
 
 type FormValues = {
-  userName: string;
+  username: string;
   password: string;
 };
+const queryClient = new QueryClient();
 
 const LoginPage = () => {
+  const router = useRouter();
+  const { data: loginDataRes,
+    mutate,
+    isPending,
+    isError: isPostError,
+    reset,
+  } = useMutation({
+    mutationFn: loginFn,
+    onSuccess: (data) => {
+      if (data.success === true) {
+        message.success(data.message);
+        router.push('/projects');
+      } else {
+        message.error(data.message);
+      }
+    },
+  });
+
   const onSubmit: SubmitHandler<FormValues> = (data) => {
-    try {
-      console.log(data);
-    } catch (err) { }
+    mutate(data);
   };
   return (
     <Row
@@ -41,7 +63,7 @@ const LoginPage = () => {
         <div>
           <Form submitHandler={onSubmit}>
             <div>
-              <FormInput name="userName" type="text" size="large" label="Username" />
+              <FormInput name="username" type="text" size="large" label="Username" />
             </div>
             <div
               style={{
