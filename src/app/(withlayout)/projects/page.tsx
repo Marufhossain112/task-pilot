@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 import Form from "@/components/Forms/Form";
 import FormInput from "@/components/Forms/FormInput";
 import { SubmitHandler } from "react-hook-form";
+import Loading from "@/app/loading";
 
 
 
@@ -21,11 +22,10 @@ const DashboardPage = () => {
 
     useEffect(() => {
         if (open === false) {
-            setProjectData(null)
+            setProjectData(null);
         }
-    }, [open,projectData]);
+    }, [open, projectData]);
 
-    const [titleDefaultValue, setTitleDefaultValue] = useState<string>("");
 
     const router = useRouter();
 
@@ -47,10 +47,9 @@ const DashboardPage = () => {
     };
 
     const handleEditProject = (project: any) => {
-        setTitleDefaultValue(project?.title);
         setProjectData(project);
         setOpen(true);
-        console.log("see project data📽️", project);
+        // console.log("see project data📽️", project);
     };
 
     const {
@@ -127,6 +126,10 @@ const DashboardPage = () => {
         editMutate({ projectId: projectData?._id, title: data.title });
         setOpen(false);
     };
+
+    if (isLoading) {
+        return <Loading />;
+    }
 
     return (
         <div className="mx-5">
