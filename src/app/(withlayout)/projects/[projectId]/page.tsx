@@ -1,15 +1,15 @@
 "use client";
-import { Badge, Button, Card, Checkbox, Col, Row, Select, message } from 'antd';
+import { Badge, Button, Card, Checkbox, Select, message } from 'antd';
 import { MoreOutlined } from "@ant-design/icons";
 import { useParams, useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { UserOutlined, CheckCircleOutlined, CheckCircleFilled } from "@ant-design/icons";
+import { CheckCircleOutlined } from "@ant-design/icons";
 import { useEffect, useState } from 'react';
 import type { CheckboxProps, MenuProps } from 'antd';
 import { Dropdown } from 'antd';
 import { BACKEND_URL } from '@/Utils/url';
 import Loading from '@/app/loading';
-import { deleteTaskFn, markAsCompleteTaskFn, editTaskFn, createTaskFn } from '@/Utils/api';
+import { deleteTaskFn, markAsCompleteTaskFn, editTaskFn } from '@/Utils/api';
 import Form from '@/components/Forms/Form';
 import FormInput from '@/components/Forms/FormInput';
 import { SubmitHandler } from 'react-hook-form';
@@ -128,7 +128,7 @@ const DynamicProjectPage = () => {
     // console.log("get tasks by project🤘", projectTasksData);
     useEffect(() => {
         refetch();
-    }, [search, refetch, status, due_date,assignee]);
+    }, [search, refetch, status, due_date, assignee]);
 
     if (isLoading) {
         return <Loading />;
@@ -159,9 +159,9 @@ const DynamicProjectPage = () => {
     return (
         <div className='mx-[1%] mt-5'>
             <h1 className="text-xl font-bold ml-2 mb-4">All Tasks</h1>
-            <Row justify={'space-between'} gutter={36} align={'middle'}>
-                <div className='flex items-center justify-between'>
-                    <Col span={6}>    <Form submitHandler={onSubmit}>
+            <div >
+                <div className='flex flex-col items-center justify-between'>
+                    <div >    <Form submitHandler={onSubmit}>
                         <div className='flex items-center gap-2  mb-5'>
                             <FormInput name="searchTerm" placeholder='Search here..' type="text" size="large" />
                             <Button type="primary" htmlType="submit">
@@ -169,13 +169,13 @@ const DynamicProjectPage = () => {
                             </Button>
                         </div>
                     </Form>
-                    </Col>
+                    </div>
 
-
-                    <Col span={18}>    <div className='flex items-center gap-2'>
+                    <div >    <div className='flex  flex-col md:flex-row items-center gap-4'>
                         <div>
                             {/* Status : {" "} */}
                             <Select
+                            className='py-2'
                                 showSearch
                                 onChange={(e) => handleStatusChange(e)}
                                 style={{ width: 200 }}
@@ -206,10 +206,9 @@ const DynamicProjectPage = () => {
 
                             <Form submitHandler={onDueSubmit}>
                                 <div className='flex gap-1 items-center'>
-                                    <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
-                                        <Col
-                                            className="gutter-row"
-                                            span={24}
+                                    <div >
+                                        <div
+
                                             style={{
                                                 marginBottom: "10px",
                                             }}
@@ -219,8 +218,8 @@ const DynamicProjectPage = () => {
                                                 label="Due Date"
                                                 size="large"
                                             />
-                                        </Col>
-                                    </Row>
+                                        </div>
+                                    </div>
                                     <Button type='primary' htmlType='submit'>Filter</Button>
                                 </div>
                             </Form>
@@ -229,10 +228,8 @@ const DynamicProjectPage = () => {
 
                             <Form submitHandler={assigneeSubmit}>
                                 <div className='flex gap-1 items-center'>
-                                    <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
-                                        <Col
-                                            className="gutter-row"
-                                            span={24}
+                                    <div >
+                                        <div
                                             style={{
                                                 marginBottom: "10px",
                                             }}
@@ -243,78 +240,75 @@ const DynamicProjectPage = () => {
                                                 size="large"
                                                 placeholder='Search by assignee name'
                                             />
-                                        </Col>
-                                    </Row>
+                                        </div>
+                                    </div>
                                     <Button type='primary' htmlType='submit'>Filter</Button>
                                 </div>
                             </Form>
                         </div>
                     </div>
-                    </Col>
-
-
-
-
+                    </div>
                 </div>
-
-
-            </Row>
+            </div>
             {
                 projectTasksData?.data.length === 0 && <p className='ml-2'>No tasks found</p>
             }
-            <Row gutter={16} >
-                {
-                    projectTasksData?.data?.map((task: any) => (
-                        <Col sm={8} key={task?._id}>
-                            <Card title={
-                                <div className="flex items-center justify-between">
-                                    <span className='flex gap-2 items-center'>
-                                        <span>{task?.title}</span>
+            <div>
+                <div className='grid md:grid-cols-3 gap-4 grid-cols-1'>
+                    {
+                        projectTasksData?.data?.map((task: any) => (
+                            <div key={task?._id}>
+                                <Card title={
+                                    <div className="flex items-center justify-between">
+                                        <span className='flex gap-2 items-center'>
+                                            <span>{task?.title}</span>
+                                            {
+                                                task?.isComplete === true && <CheckCircleOutlined />
+                                            }
+
+                                        </span>
+                                        <Dropdown trigger={["click"]} menu={{ items }} placement="topLeft">
+                                            <MoreOutlined onClick={() => setTaskId(task?._id)} />
+                                        </Dropdown>
+
+                                    </div>
+                                } bordered={false} >
+                                    {/* <span className='mb-2'>{task?.status}</span> */}
+                                    <div className='flex justify-between'>
+                                        <Badge
+                                            className="site-badge-count-109"
+                                            count={task?.status}
+                                            style={{ backgroundColor: '#52c41a' }}
+                                        />
                                         {
-                                            task?.isComplete === true && <CheckCircleOutlined />
+                                            task?.isComplete === false && <span className='flex gap-1'>
+                                                <span>Mark as complete</span>
+                                                <Checkbox onChange={() => onChange(task?._id)} />
+                                            </span>
                                         }
 
-                                    </span>
-                                    <Dropdown trigger={["click"]} menu={{ items }} placement="topLeft">
-                                        <MoreOutlined onClick={() => setTaskId(task?._id)} />
-                                    </Dropdown>
+                                    </div>
 
-                                </div>
-                            } bordered={false} >
-                                {/* <span className='mb-2'>{task?.status}</span> */}
-                                <div className='flex justify-between'>
-                                    <Badge
-                                        className="site-badge-count-109"
-                                        count={task?.status}
-                                        style={{ backgroundColor: '#52c41a' }}
-                                    />
-                                    {
-                                        task?.isComplete === false && <span className='flex gap-1'>
-                                            <span>Mark as complete</span>
-                                            <Checkbox onChange={() => onChange(task?._id)} />
-                                        </span>
-                                    }
+                                    <p className='mt-2'>
+                                        {task?.description}
+                                    </p>
 
-                                </div>
-
-                                <p className='mt-2'>
-                                    {task?.description}
-                                </p>
-
-                                <div className='mt-2'>
-                                    <p className='text-gray-700 font-medium'>Due on : {task?.due_date}</p>
-                                </div>
-                                <div className='mt-2'>
-                                    <ul className='text-gray-700 font-medium'> <span className='font-semibold text-gray-800'>Assignee :</span>  {task?.assigned_to?.map((person: string, index: number) => <li key={index}>{person}</li>)}</ul>
-                                </div>
-                            </Card>
-                            <div className='mt-4' />
-                        </Col>
-                    ))
-                }
+                                    <div className='mt-2'>
+                                        <p className='text-gray-700 font-medium'>Due on : {task?.due_date}</p>
+                                    </div>
+                                    <div className='mt-2'>
+                                        <ul className='text-gray-700 font-medium'> <span className='font-semibold text-gray-800'>Assignee :</span>  {task?.assigned_to?.map((person: string, index: number) => <li key={index}>{person}</li>)}</ul>
+                                    </div>
+                                </Card>
+                                <div className='mt-4' />
+                            </div>
+                        ))
+                    }
 
 
-            </Row>
+                </div>
+            </div>
+
             <Button onClick={() => router.push(`/projects/${projectId}/tasks/create`)}>Add New Task</Button>
         </div>
 
