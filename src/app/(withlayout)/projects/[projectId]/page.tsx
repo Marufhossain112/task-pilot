@@ -80,7 +80,7 @@ const DynamicProjectPage = () => {
         {
             key: '1',
             label: (
-                <span>
+                <span onClick={() => router.push(`/tasks/edit/${taskId}`)}>
                     Edit
                 </span>
             ),
