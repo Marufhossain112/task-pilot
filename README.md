@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Task Pilot
 
-## Getting Started
+A project management app where you can handle your projects and teams.
 
-First, run the development server:
+## 🔗 Live site
+
+URL - https://task-pilot-frg.vercel.app
+
+## Tech Stack
+
+**Client:** NextJs, AntD, React-hook-form, Tanstack Query
+
+**Server:** Node, Express, MongoDB
+
+## Features
+
+- Users can create,update,delete tasks.
+- Users can search tasks for faster experience.
+- Users can login through an authentication process.
+
+## How to run locally
+
+At first, clone the project running below command
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+ git clone [repo-link]
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+After cloning, navigate to inside the project
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+  cd task-pilot
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+Then run
 
-## Learn More
+```bash
+  npm install
+```
 
-To learn more about Next.js, take a look at the following resources:
+After installing, run below command
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+  npm run dev
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+#### Boom !!! Your project is successfully running locally.
 
-## Deploy on Vercel
+## How to login on the website
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Visit https://dummyjson.com/users this link,  use any username and password as credential.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+For Example, 
+username - atuny0
+password - 9uQFF1Lh
+
+
+
