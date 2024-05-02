@@ -1,54 +1,103 @@
 "use client";
-import { Badge, Card, Col, Row } from 'antd';
+import { Badge, Button, Card, Checkbox, Col, Row, message } from 'antd';
 import { MoreOutlined } from "@ant-design/icons";
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-
-import React from 'react';
-import type { MenuProps } from 'antd';
-import { Button, Dropdown, Space } from 'antd';
+import { UserOutlined, CheckCircleOutlined, CheckCircleFilled } from "@ant-design/icons";
+import { useState } from 'react';
+import type { CheckboxProps, MenuProps } from 'antd';
+import { Dropdown } from 'antd';
 import { BACKEND_URL } from '@/Utils/url';
 import Loading from '@/app/loading';
-
-
-
-const items: MenuProps['items'] = [
-    {
-        key: '1',
-        label: (
-            <a target="_blank" rel="noopener noreferrer" href="https://www.antgroup.com">
-                Edit
-            </a>
-        ),
-    },
-
-    {
-        key: '2',
-        label: (
-            <a target="_blank" rel="noopener noreferrer" href="https://www.aliyun.com">
-                Mark as complete
-            </a>
-        ),
-    },
-
-    {
-        key: '3',
-        label: (
-            <a target="_blank" rel="noopener noreferrer" href="https://www.aliyun.com">
-                <span className='text-red-700'>
-                    Delete
-                </span>
-            </a>
-        ),
-    },
-
-
-];
+import { deleteTaskFn, markAsCompleteTaskFn, editTaskFn, createTaskFn } from '@/Utils/api';
 
 
 const DynamicProjectPage = () => {
+    const router = useRouter();
+    const [taskId, setTaskId] = useState<string>("");
     const queryClient = useQueryClient();
     const { projectId } = useParams();
+
+    // mutation for mask as complete
+    const {
+        mutate: markAsCompleteMutate
+    } = useMutation({
+        mutationFn: markAsCompleteTaskFn,
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: ['tasks'] });
+            if (data.success === true) {
+                message.success(data.message);
+            } else {
+                message.error(data.message);
+            }
+        },
+    });
+
+    // mutation for task delete
+    const {
+        mutate: taskDeleteMutate
+    } = useMutation({
+        mutationFn: deleteTaskFn,
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: ['tasks'] });
+            if (data.success === true) {
+                message.success(data.message);
+            } else {
+                message.error(data.message);
+            }
+        },
+    });
+
+    // mutation for task edit
+    const {
+        mutate: editTaskMutate
+    } = useMutation({
+        mutationFn: editTaskFn,
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: ['tasks'] });
+            if (data.success === true) {
+                message.success(data.message);
+            } else {
+                message.error(data.message);
+            }
+        },
+    });
+
+
+
+    const onChange: CheckboxProps['onChange'] = (task_id) => {
+        markAsCompleteMutate(task_id as unknown as string);
+    };
+
+    // handle task deletion
+    const handleDeleteTask = (task_id: string) => {
+        // console.log("see task id🥳", task_id);
+        taskDeleteMutate(task_id);
+    };
+
+
+    const items: MenuProps['items'] = [
+        {
+            key: '1',
+            label: (
+                <span>
+                    Edit
+                </span>
+            ),
+        },
+
+        {
+            key: '2',
+            label: (
+                <span className='text-red-700' onClick={() => handleDeleteTask(taskId)}>
+                    Delete
+                </span>
+
+            ),
+        },
+
+
+    ];
 
     const { data: projectTasksData, isLoading } = useQuery(
         {
@@ -60,7 +109,7 @@ const DynamicProjectPage = () => {
             }
         });
 
-    console.log("get tasks by project🤘", projectTasksData);
+    // console.log("get tasks by project🤘", projectTasksData);
 
     if (isLoading) {
         return <Loading />;
@@ -78,18 +127,35 @@ const DynamicProjectPage = () => {
                         <Col sm={8} key={task?._id}>
                             <Card title={
                                 <div className="flex items-center justify-between">
-                                    <span>{task?.title}</span>
-                                    <Dropdown menu={{ items }} placement="topLeft">
-                                        <MoreOutlined />
+                                    <span className='flex gap-2 items-center'>
+                                        <span>{task?.title}</span>
+                                        {
+                                            task?.isComplete === true && <CheckCircleOutlined />
+                                        }
+
+                                    </span>
+                                    <Dropdown trigger={["click"]} menu={{ items }} placement="topLeft">
+                                        <MoreOutlined onClick={() => setTaskId(task?._id)} />
                                     </Dropdown>
+
                                 </div>
                             } bordered={false} >
                                 {/* <span className='mb-2'>{task?.status}</span> */}
-                                <Badge
-                                    className="site-badge-count-109"
-                                    count={task?.status}
-                                    style={{ backgroundColor: '#52c41a' }}
-                                />
+                                <div className='flex justify-between'>
+                                    <Badge
+                                        className="site-badge-count-109"
+                                        count={task?.status}
+                                        style={{ backgroundColor: '#52c41a' }}
+                                    />
+                                    {
+                                        task?.isComplete === false && <span className='flex gap-1'>
+                                            <span>Mark as complete</span>
+                                            <Checkbox onChange={() => onChange(task?._id)} />
+                                        </span>
+                                    }
+
+                                </div>
+
                                 <p className='mt-2'>
                                     {task?.description}
                                 </p>
@@ -108,6 +174,7 @@ const DynamicProjectPage = () => {
 
 
             </Row>
+            <Button onClick={() => router.push(`/projects/${projectId}/tasks/create`)}>Add New Task</Button>
         </div>
 
     );
