@@ -48,11 +48,9 @@ After installing, run below command
 
 ## How to login on the website
 
-Visit https://dummyjson.com/users this link,  use any username and password as credential.
+Visit https://dummyjson.com/users this link, use any username and password as credential.
 
-For Example, 
-username - atuny0
-password - 9uQFF1Lh
+For Example,
 
-
-
+- username - atuny0
+- password - 9uQFF1Lh
