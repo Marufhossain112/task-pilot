@@ -1,5 +1,5 @@
 "use client";
-import { Badge, Button, Card, Checkbox, Col, Row, message } from 'antd';
+import { Badge, Button, Card, Checkbox, Col, Row, Select, message } from 'antd';
 import { MoreOutlined } from "@ant-design/icons";
 import { useParams, useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -13,12 +13,16 @@ import { deleteTaskFn, markAsCompleteTaskFn, editTaskFn, createTaskFn } from '@/
 import Form from '@/components/Forms/Form';
 import FormInput from '@/components/Forms/FormInput';
 import { SubmitHandler } from 'react-hook-form';
+import FormDatePicker from '@/components/UI/FormDatePicker';
 
 
 const DynamicProjectPage = () => {
     const router = useRouter();
     const [taskId, setTaskId] = useState<string>("");
     const [search, setSearch] = useState<string>("");
+    const [status, setStatus] = useState<string>("");
+    const [due_date, setDueDate] = useState<string>("");
+    const [assignee, setAssignee] = useState<string>("");
     const queryClient = useQueryClient();
     const { projectId } = useParams();
 
@@ -102,12 +106,20 @@ const DynamicProjectPage = () => {
 
 
     ];
-
+    let filterUrl: string;
+    if (status) {
+        filterUrl = `status=${status}`;
+    } else if (due_date) {
+        filterUrl = `due_date=${due_date}`;
+    } else if (assignee) {
+        filterUrl = `assigned_to=${assignee}`;
+    }
+    // console.log("filterurl🚀", filterUrl);
     const { data: projectTasksData, isLoading, refetch } = useQuery(
         {
             queryKey: ['tasks'],
             queryFn: async () => {
-                const response = await fetch(`${BACKEND_URL}/tasks?project=${projectId}&searchTerm=${search}`);
+                const response = await fetch(`${BACKEND_URL}/tasks?project=${projectId}&searchTerm=${search}&${filterUrl}`);
                 const data = await response.json();
                 return data;
             }
@@ -116,7 +128,7 @@ const DynamicProjectPage = () => {
     // console.log("get tasks by project🤘", projectTasksData);
     useEffect(() => {
         refetch();
-    }, [search, refetch]);
+    }, [search, refetch, status, due_date,assignee]);
 
     if (isLoading) {
         return <Loading />;
@@ -127,20 +139,126 @@ const DynamicProjectPage = () => {
     const onSubmit: SubmitHandler<FormValues> = (data) => {
         setSearch(data?.searchTerm);
     };
-    console.log('search data🍘', search);
+    const handleStatusChange = (value: string) => {
+        // console.log("selected value", value);
+        setStatus(value);
+    };
+    const onDueSubmit: SubmitHandler<{ due_date: string; }> = (data: any) => {
+        const dueDateData = {
+            due_date: data?.due_date?.$D + "/" + data?.due_date?.$M + "/" + data?.due_date?.$y,
+        };
+        setDueDate(dueDateData?.due_date);
+        // console.log("due data", dueDateData);
+
+    };
+    const assigneeSubmit: SubmitHandler<{ assigned_to: string; }> = (data) => {
+        setAssignee(data?.assigned_to);
+        // console.log("assignee data", data);
+    };
+    // console.log('search data🍘', search);
     return (
         <div className='mx-[1%] mt-5'>
-            <div>
-                <h1 className="text-xl font-bold ml-2 mb-4">All Tasks</h1>
-                <Form submitHandler={onSubmit}>
-                    <div className='flex items-center gap-2 max-w-[40%] mb-5'>
-                        <FormInput name="searchTerm" type="text" size="large" />
-                        <Button type="primary" htmlType="submit">
-                            Search
-                        </Button>
+            <h1 className="text-xl font-bold ml-2 mb-4">All Tasks</h1>
+            <Row justify={'space-between'} gutter={36} align={'middle'}>
+                <div className='flex items-center justify-between'>
+                    <Col span={6}>    <Form submitHandler={onSubmit}>
+                        <div className='flex items-center gap-2  mb-5'>
+                            <FormInput name="searchTerm" placeholder='Search here..' type="text" size="large" />
+                            <Button type="primary" htmlType="submit">
+                                Search
+                            </Button>
+                        </div>
+                    </Form>
+                    </Col>
+
+
+                    <Col span={18}>    <div className='flex items-center gap-2'>
+                        <div>
+                            {/* Status : {" "} */}
+                            <Select
+                                showSearch
+                                onChange={(e) => handleStatusChange(e)}
+                                style={{ width: 200 }}
+                                placeholder="Filter By Status"
+                                optionFilterProp="children"
+                                filterOption={(input, option) => (option?.label ?? '').includes(input)}
+                                filterSort={(optionA, optionB) =>
+                                    (optionA?.label ?? '').toLowerCase().localeCompare((optionB?.label ?? '').toLowerCase())
+                                }
+                                options={[
+                                    {
+                                        value: 'Do',
+                                        label: 'Do',
+                                    },
+                                    {
+                                        value: 'In Progress',
+                                        label: 'In Progress',
+                                    },
+                                    {
+                                        value: 'Done',
+                                        label: 'Done',
+                                    }
+                                ]}
+                            />
+
+                        </div>
+                        <div>
+
+                            <Form submitHandler={onDueSubmit}>
+                                <div className='flex gap-1 items-center'>
+                                    <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
+                                        <Col
+                                            className="gutter-row"
+                                            span={24}
+                                            style={{
+                                                marginBottom: "10px",
+                                            }}
+                                        >
+                                            <FormDatePicker
+                                                name="due_date"
+                                                label="Due Date"
+                                                size="large"
+                                            />
+                                        </Col>
+                                    </Row>
+                                    <Button type='primary' htmlType='submit'>Filter</Button>
+                                </div>
+                            </Form>
+                        </div>
+                        <div>
+
+                            <Form submitHandler={assigneeSubmit}>
+                                <div className='flex gap-1 items-center'>
+                                    <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
+                                        <Col
+                                            className="gutter-row"
+                                            span={24}
+                                            style={{
+                                                marginBottom: "10px",
+                                            }}
+                                        >
+                                            <FormInput
+                                                name="assigned_to"
+                                                label="Assignee"
+                                                size="large"
+                                                placeholder='Search by assignee name'
+                                            />
+                                        </Col>
+                                    </Row>
+                                    <Button type='primary' htmlType='submit'>Filter</Button>
+                                </div>
+                            </Form>
+                        </div>
                     </div>
-                </Form>
-            </div>
+                    </Col>
+
+
+
+
+                </div>
+
+
+            </Row>
             {
                 projectTasksData?.data.length === 0 && <p className='ml-2'>No tasks found</p>
             }
