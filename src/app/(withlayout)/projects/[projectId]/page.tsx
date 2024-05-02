@@ -4,17 +4,21 @@ import { MoreOutlined } from "@ant-design/icons";
 import { useParams, useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { UserOutlined, CheckCircleOutlined, CheckCircleFilled } from "@ant-design/icons";
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { CheckboxProps, MenuProps } from 'antd';
 import { Dropdown } from 'antd';
 import { BACKEND_URL } from '@/Utils/url';
 import Loading from '@/app/loading';
 import { deleteTaskFn, markAsCompleteTaskFn, editTaskFn, createTaskFn } from '@/Utils/api';
+import Form from '@/components/Forms/Form';
+import FormInput from '@/components/Forms/FormInput';
+import { SubmitHandler } from 'react-hook-form';
 
 
 const DynamicProjectPage = () => {
     const router = useRouter();
     const [taskId, setTaskId] = useState<string>("");
+    const [search, setSearch] = useState<string>("");
     const queryClient = useQueryClient();
     const { projectId } = useParams();
 
@@ -99,25 +103,44 @@ const DynamicProjectPage = () => {
 
     ];
 
-    const { data: projectTasksData, isLoading } = useQuery(
+    const { data: projectTasksData, isLoading, refetch } = useQuery(
         {
             queryKey: ['tasks'],
             queryFn: async () => {
-                const response = await fetch(`${BACKEND_URL}/tasks?project=${projectId}`);
+                const response = await fetch(`${BACKEND_URL}/tasks?project=${projectId}&searchTerm=${search}`);
                 const data = await response.json();
                 return data;
             }
         });
 
     // console.log("get tasks by project🤘", projectTasksData);
+    useEffect(() => {
+        refetch();
+    }, [search, refetch]);
 
     if (isLoading) {
         return <Loading />;
     }
-
+    type FormValues = {
+        searchTerm: string;
+    };
+    const onSubmit: SubmitHandler<FormValues> = (data) => {
+        setSearch(data?.searchTerm);
+    };
+    console.log('search data🍘', search);
     return (
         <div className='mx-[1%] mt-5'>
-            <h1 className="text-xl font-bold ml-2 mb-4">All Tasks</h1>
+            <div>
+                <h1 className="text-xl font-bold ml-2 mb-4">All Tasks</h1>
+                <Form submitHandler={onSubmit}>
+                    <div className='flex items-center gap-2 max-w-[40%] mb-5'>
+                        <FormInput name="searchTerm" type="text" size="large" />
+                        <Button type="primary" htmlType="submit">
+                            Search
+                        </Button>
+                    </div>
+                </Form>
+            </div>
             {
                 projectTasksData?.data.length === 0 && <p className='ml-2'>No tasks found</p>
             }
