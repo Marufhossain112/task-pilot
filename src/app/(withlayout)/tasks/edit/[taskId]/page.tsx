@@ -8,13 +8,16 @@ import FormDatePicker from '@/components/UI/FormDatePicker';
 import FormMultiSelectField, { SelectOptions } from '@/components/UI/FormMultiSelectField';
 import FormTextArea from '@/components/UI/FormTextArea';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Button, Col, Row, message } from 'antd';
+import { Button, Col, Row, Select, message } from 'antd';
 import { useParams } from 'next/navigation';
+import { useState } from 'react';
 import { SubmitHandler } from 'react-hook-form';
 
 type FormValues = any;
 
 const TaskEditPage = () => {
+    const [status, setStatus] = useState<string>("");
+    const [isComplete, setIsComplete] = useState<boolean>(false);
     const { taskId } = useParams();
 
     const queryClient = useQueryClient();
@@ -65,7 +68,8 @@ const TaskEditPage = () => {
             description: data?.description,
             due_date: data?.due_date?.$D + "/" + data?.due_date?.$M + "/" + data?.due_date?.$y,
             assigned_to: data?.assigned_to,
-
+            status,
+            isComplete
         };
         // console.log(createTaskData);
         const updateData = {
@@ -75,6 +79,16 @@ const TaskEditPage = () => {
         // @ts-ignore
         editTaskMutate(updateData);
     };
+
+    const handleStatusChange = (value: string) => {
+        // console.log("selected value", value);
+        setStatus(value);
+    };
+    const handleIsCompleteChange = (value: boolean) => {
+        console.log("selected value", value);
+        setIsComplete(value);
+    };
+
 
     if (isLoading || userLoading) {
         return <Loading />;
@@ -139,13 +153,13 @@ const TaskEditPage = () => {
 
                             <FormMultiSelectField
                                 name="assigned_to"
-                                label="Assign Members"
+                                label="Assignee"
                                 options={coursesOptions as SelectOptions[]}
                             />
                         </Col>
 
 
-                        <Col span={24} style={{ margin: "0px 0" }}>
+                        <Col span={12} style={{ margin: "0px 0" }}>
                             <FormTextArea
                                 name="description"
                                 label="Description"
@@ -153,6 +167,64 @@ const TaskEditPage = () => {
                                 rows={6}
                             />
                         </Col>
+                        <Col span={6} style={{ margin: "0px 0" }}>
+                            Status <br />
+                            <Select
+                                className='py-2'
+                                showSearch
+                                onChange={(e) => handleStatusChange(e)}
+                                style={{ width: 200 }}
+                                placeholder="Update Status"
+                                defaultValue={taskData?.data?.status}
+                                optionFilterProp="children"
+                                filterOption={(input, option) => (option?.label ?? '').includes(input)}
+                                filterSort={(optionA, optionB) =>
+                                    (optionA?.label ?? '').toLowerCase().localeCompare((optionB?.label ?? '').toLowerCase())
+                                }
+                                options={[
+                                    {
+                                        value: 'Do',
+                                        label: 'Do',
+                                    },
+                                    {
+                                        value: 'In Progress',
+                                        label: 'In Progress',
+                                    },
+                                    {
+                                        value: 'Done',
+                                        label: 'Done',
+                                    }
+                                ]}
+                            />
+                        </Col>
+
+                        <Col span={6} style={{ margin: "0px 0" }}>
+                            Is Complete <br />
+                            <Select
+                                className='py-2'
+                                showSearch
+                                onChange={(e) => handleIsCompleteChange(e)}
+                                style={{ width: 200 }}
+                                defaultValue={taskData?.data?.isComplete}
+                                optionFilterProp="children"
+                                filterOption={(input, option) => (option?.label ?? '').includes(input)}
+                                filterSort={(optionA, optionB) =>
+                                    (optionA?.label ?? '').toLowerCase().localeCompare((optionB?.label ?? '').toLowerCase())
+                                }
+                                options={[
+                                    {
+                                        value: true,
+                                        label: 'True',
+                                    },
+                                    {
+                                        value: false,
+                                        label: 'False',
+                                    },
+
+                                ]}
+                            />
+                        </Col>
+
 
 
 

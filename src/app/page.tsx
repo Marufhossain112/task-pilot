@@ -1,22 +1,7 @@
-import React from 'react';
-import { Button, Flex } from 'antd';
+import { redirect } from "next/navigation";
 
-const App: React.FC = () => (
-  <Flex wrap="wrap" gap="small">
-    <Button type="primary" danger>
-      Primary
-    </Button>
-    <Button danger>Default</Button>
-    <Button type="dashed" danger>
-      Dashed
-    </Button>
-    <Button type="text" danger>
-      Text
-    </Button>
-    <Button type="link" danger>
-      Link
-    </Button>
-  </Flex>
-);
+const HomePage = () => {
+  return redirect("/login");
+};
 
-export default App;
+export default HomePage;
